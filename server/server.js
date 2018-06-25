@@ -17,7 +17,13 @@ var {authenticate} = require('./middleware/authenticate')
 var app = express();
 const port = process.env.PORT;
 
+// MIDDLEWARES
 app.use(bodyParser.json());
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 // POST /todos
 
@@ -167,6 +173,7 @@ app.delete('/users/me/token', authenticate, (req, res) => {
       res.status(400).send();
   }) 
 });
+
 // Express Listen
 
 app.listen(port, () => {
