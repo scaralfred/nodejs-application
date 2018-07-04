@@ -31,6 +31,10 @@ var UserSchema = new mongoose.Schema({
            required: true
        }
    }],
+   schoolID: {
+       type: String,
+       required: false
+   }
 }, {
     usePushEach: true 
 });
@@ -39,7 +43,7 @@ UserSchema.methods.toJSON = function () {
   var user = this;
   var userObject = user.toObject();
     
-    return _.pick(userObject, ['_id', 'email']);
+    return _.pick(userObject, ['_id', 'email', 'schoolID']);
 };
 
 UserSchema.methods.generateAuthToken = function () {
@@ -86,7 +90,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
     
     return User.findOne({email}).then((user) => {
         if(!user) {
-            return Promise.reject('Email not found');
+            return Promise.reject();
         }
         
         return new Promise ((resolve, reject) => {
@@ -94,7 +98,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
                 if(res) {
                     resolve(user);
                 } else {
-                    reject('Incorrect password'); 
+                    reject(); 
                 }
             })
         });

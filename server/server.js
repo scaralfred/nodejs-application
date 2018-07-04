@@ -9,25 +9,73 @@ const {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
+var {School} = require('./models/school')
 var {User} = require('./models/user');
 var {authenticate} = require('./middleware/authenticate')
 
 // SET UP EXPRESS AND PORT NUMBER 
 
 var app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 
 // MIDDLEWARES
 app.use(bodyParser.json());
 app.use(function (req, res, next) {
-    
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token,Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token, Authorization, x-auth' );
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader('Access-Control-Expose-Headers', 'X-Api-Version, x-auth, X-Request-Id, X-Response-Time');
     res.setHeader('Access-Control-Max-Age', '1000');
-    
     next();
+});
+
+// POST CLASS //
+
+app.post('/school', authenticate, (req,res) => {
+    var school = new School({
+         classSettings: req.body,
+        _creator: req.user._id
+    })
+  school.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
+// UPDATE A SINGLE CLASS  //
+
+app.patch('/school/:id', authenticate, (req, res) => {
+  var id = req.params.id;
+  var body = _.pick(req.body, ['classSettings']);
+
+  School.findOneAndUpdate({_id: id}, {$set: body}, {new: true}).then((school) => {
+    if (!school) {
+      return res.status(404).send();
+    }
+
+    res.send({school});
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
+// GET A SINGLE CLASS
+
+app.get('/school/:id', (req, res) => {
+  var id = req.params.id;
+
+  School.findOne({
+      _id: id
+  }).then((school) => {
+    if (!school) {
+      return res.status(404).send();
+    }
+
+    res.send({school});
+  }).catch((e) => {
+    res.status(400).send();
+  });
 });
 
 // POST /todos
@@ -134,39 +182,56 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 /// POST /users
 
 app.post('/users', (req, res) => {
-//  var user = new User({
-//    email: req.body.email,
-//    password: req.body.password
-//  });   OR YOU CAN ALSO USE THE LODASH METHOD => Pick   
-var body = _.pick(req.body, ['email','password']);
-var user = new User(body); 
-
-  user.save().then(() => {
+    var newSchool = {
+        starCounter: 0,
+        classList: [],
+        playerPhoto: []
+    }
+    
+    var school = new School({
+         classSettings: newSchool
+    })
+  
+    var user = new User({
+        email: req.body.email,
+        password: req.body.password,
+        schoolID: school._id
+    });  // OR YOU CAN ALSO USE THE LODASH METHOD => var body = _.pick(req.body, ['email','password']);
+    
+  school.save().then(()=> {
+      return user.save();
+  }).then(() => {
      return user.generateAuthToken();
   }).then((token) => {
-    res.header('x-auth', token).send(user);
+    res.header('x-auth', token).send({user, school});
   }).catch((e) => {
     res.status(400).send(e);
   });
+});
+
+
+app.post('/users/login', (req, res) => {
+   var body = _.pick(req.body, ['email','password']);
+    
+    User.findByCredentials(body.email, body.password)
+    .then((userFound) => user = userFound )
+    .then((user) => School.findOne({ _id: user.schoolID }) )
+    .then((school) => schoolSettings = school.classSettings )
+    .then(() => user.generateAuthToken()
+        .then((token) => {   
+        res.header('x-auth', token).send({user, schoolSettings}); 
+        })
+    )
+    .catch((e) => {
+        res.status(400).send();
+    });
+
 });
 
 // GET ROUTE
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user)
-});
-
-// POST /users/login {email, password}
-
-app.post('/users/login', (req, res) => {
-   var body = _.pick(req.body, ['email','password']);
-     
-    User.findByCredentials(body.email, body.password).then((user) => {
-       return user.generateAuthToken().then((token) => {   res.header('x-auth', token).send(user);
-        });
-    }).catch((e) => {
-        res.status(400).send(e);
-    });
 });
 
 // DELETE => Logout Users
