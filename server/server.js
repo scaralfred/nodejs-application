@@ -198,13 +198,12 @@ app.post('/users', (req, res) => {
         schoolID: school._id
     });  // OR YOU CAN ALSO USE THE LODASH METHOD => var body = _.pick(req.body, ['email','password']);
     
-  school.save().then(()=> {
-      return user.save();
-  }).then(() => {
+  user.save().then(() => {
      return user.generateAuthToken();
   }).then((token) => {
     res.header('x-auth', token).send({user, school});
-  }).catch((e) => {
+  }).then(() => school.save())
+    .catch((e) => {
     res.status(400).send(e);
   });
 });
