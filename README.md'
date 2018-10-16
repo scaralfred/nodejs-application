@@ -4,6 +4,6 @@ AUTHENTICATION APP BUILT WITH NODE, EXPRESS AND MONGODB.
 
 This app allows users to authenticate to the back-end server through some of the most secure, fast and reliable javascript frameworks and libraries.
 
-It can be easily integrated with any RESTful API and utilizes advanced cryptography to store username and password through a token (SHA256).
+It can be easily integrated with any RESTful API and utilizes advanced cryptography to store username and password through a super-secure token (SHA256).
 
 You can test it out with  a supporting software like POSTMAN.
