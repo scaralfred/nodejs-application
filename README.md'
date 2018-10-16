@@ -6,4 +6,4 @@ This app allows users to authenticate to the back-end server through some of the
 
 It can be easily integrated with any RESTful API and utilizes advanced cryptography to store username and password through a super-secure token (SHA256).
 
-You can test it out with  a supporting software like POSTMAN.
+You can test it out with a supporting software like POSTMAN.
