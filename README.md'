@@ -1,7 +1,7 @@
 AUTHENTICATION BACK-END APP BUILT WITH NODE, EXPRESS AND MONGODB.
 
-This back-end system allows users to authenticate to the server through some of the most secure, fast and reliable javascript frameworks and libraries.
+This app allows users to authenticate to the server using node js, expres and mongoDB.
 
 It can be easily integrated with any web app and utilizes advanced cryptography to store username and password through a token generation (SHA256).
 
-You can test it out with a supporting software like POSTMAN.
+You can test it out with a POSTMAN.
