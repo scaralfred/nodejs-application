@@ -4,4 +4,4 @@ This app allows users to authenticate to the server using node js, expres and mo
 
 It can be easily integrated with any web app to store username and password through a token generation (SHA256).
 
-You can test it out with a POSTMAN.
+You can test it out with POSTMAN.
